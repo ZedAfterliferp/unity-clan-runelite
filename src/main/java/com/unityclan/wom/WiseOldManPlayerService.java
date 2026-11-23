@@ -7,7 +7,7 @@ import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import com.unityclan.net.ClanHttpConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -93,8 +93,8 @@ public class WiseOldManPlayerService
 
     private PlayerStats requestPlayerDirect(URL url, String username) throws Exception
     {
-        HttpURLConnection connection =
-                (HttpURLConnection) url.openConnection();
+        ClanHttpConnection connection =
+                ClanHttpConnection.open(url.toString());
 
         connection.setRequestMethod("GET");
         connection.setRequestProperty(
