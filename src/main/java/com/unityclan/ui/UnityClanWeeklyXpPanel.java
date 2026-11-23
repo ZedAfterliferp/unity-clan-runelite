@@ -12,7 +12,7 @@ import com.unityclan.members.ClanMemberInfo;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.net.HttpURLConnection;
+import com.unityclan.net.ClanHttpConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -314,7 +314,7 @@ public final class UnityClanWeeklyXpPanel extends JPanel {
         String start = week + "T00:00:00.000Z";
         String url = API + "?metric=overall&startDate=" + URLEncoder.encode(start, "UTF-8")
                 + "&endDate=" + URLEncoder.encode(end, "UTF-8");
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        ClanHttpConnection conn = ClanHttpConnection.open(url);
         conn.setRequestProperty("Accept", "application/json");
         conn.setRequestProperty("User-Agent", "UnityClanRuneLitePlugin/1.0");
         conn.setConnectTimeout(10000); conn.setReadTimeout(30000);
