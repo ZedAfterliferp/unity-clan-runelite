@@ -67,8 +67,8 @@ public class UnityClanEventsPanel extends JPanel
             Set<String> names = null;
             try {
                 names = WiseOldManRequestGate.execute(() -> {
-                    HttpURLConnection connection = (HttpURLConnection) new URL(
-                            "https://api.wiseoldman.net/v2/groups/10453").openConnection();
+                    ClanHttpConnection connection = ClanHttpConnection.open(
+                            "https://api.wiseoldman.net/v2/groups/10453");
                     try {
                         connection.setConnectTimeout(7000);
                         connection.setReadTimeout(10000);
