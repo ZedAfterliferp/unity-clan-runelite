@@ -15,7 +15,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import com.unityclan.net.ClanHttpConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -213,7 +213,7 @@ public class UnityClanRandomEventsPanel extends JPanel
     }
 
     private JsonObject post(String endpoint, JsonObject payload) throws Exception {
-        HttpURLConnection c = (HttpURLConnection) new URL(endpoint).openConnection();
+        ClanHttpConnection c = ClanHttpConnection.open(endpoint);
         try {
             c.setRequestMethod("POST");
             c.setConnectTimeout(7000);
@@ -338,9 +338,9 @@ public class UnityClanRandomEventsPanel extends JPanel
         fetching = true;
         lastPollAt = System.currentTimeMillis();
         worker.execute(() -> {
-            HttpURLConnection c = null;
+            ClanHttpConnection c = null;
             try {
-                c = (HttpURLConnection) new URL(STATUS_URL).openConnection();
+                c = ClanHttpConnection.open(STATUS_URL);
                 c.setConnectTimeout(5000);
                 c.setReadTimeout(5000);
                 c.setRequestProperty("Accept", "application/json");
