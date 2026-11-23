@@ -1,6 +1,9 @@
 
         package com.unityclan.ui;
 
+import com.unityclan.ClanCache;
+import net.runelite.client.util.Filepath;
+
 import com.unityclan.wom.WiseOldManRequestGate;
 
 import com.google.gson.JsonArray;
@@ -32,10 +35,10 @@ public final class UnityClanWeeklyXpPanel extends JPanel {
     private static final Color MUTED = Color.decode("#B8A7A1");
     private static final Color[] MEDALS = {GOLD, Color.decode("#C9CCD2"), Color.decode("#BD8561")};
     private static final String API = "https://api.wiseoldman.net/v2/groups/10453/gained";
-    private static final File CACHE = new File(new File(System.getProperty("user.home"), ".runelite/unity-clan"), "weekly-xp-cache.json");
+    private static Filepath CACHE() { return ClanCache.file("weekly-xp-cache.json"); }
     private static final long REFRESH_MS = TimeUnit.HOURS.toMillis(24);
     private static final long MANUAL_REFRESH_MS = TimeUnit.MINUTES.toMillis(5);
-    private static final File PREVIOUS_CACHE = new File(CACHE.getParentFile(), "previous-week-winner.json");
+    private static Filepath PREVIOUS_CACHE() { return ClanCache.file("previous-week-winner.json"); }
     private static final long PREVIOUS_RETRY_MS = TimeUnit.HOURS.toMillis(1);
     private static final long ERROR_RETRY_MS = TimeUnit.MINUTES.toMillis(5);
     private static final long MAX_RETRY_MS = TimeUnit.MINUTES.toMillis(60);
@@ -258,8 +261,8 @@ public final class UnityClanWeeklyXpPanel extends JPanel {
     }
 
     private void loadPreviousCache() {
-        if (!PREVIOUS_CACHE.isFile()) return;
-        try (Reader reader = new InputStreamReader(new FileInputStream(PREVIOUS_CACHE), StandardCharsets.UTF_8)) {
+        if (!PREVIOUS_CACHE().isFile()) return;
+        try (Reader reader = new InputStreamReader(PREVIOUS_CACHE().openInputStream(), StandardCharsets.UTF_8)) {
             JsonObject object = new JsonParser().parse(reader).getAsJsonObject();
             previousWeek = string(object, "week", "");
             previousName = string(object, "name", "");
@@ -271,12 +274,12 @@ public final class UnityClanWeeklyXpPanel extends JPanel {
 
     private void savePreviousCache() {
         try {
-            if (!PREVIOUS_CACHE.getParentFile().isDirectory() && !PREVIOUS_CACHE.getParentFile().mkdirs()) return;
+            PREVIOUS_CACHE().getParent().createDirectories();
             JsonObject object = new JsonObject();
             object.addProperty("week", previousWeek);
             object.addProperty("name", previousName);
             object.addProperty("xp", previousXp);
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(PREVIOUS_CACHE), StandardCharsets.UTF_8)) {
+            try (Writer writer = new OutputStreamWriter(PREVIOUS_CACHE().openOutputStream(), StandardCharsets.UTF_8)) {
                 writer.write(object.toString());
             }
         } catch (Exception ignored) { /* Optional saved winner. */ }
@@ -360,8 +363,8 @@ public final class UnityClanWeeklyXpPanel extends JPanel {
     }
 
     private void loadCache() {
-        if (!CACHE.isFile()) return;
-        try (Reader reader = new InputStreamReader(new FileInputStream(CACHE), StandardCharsets.UTF_8)) {
+        if (!CACHE().isFile()) return;
+        try (Reader reader = new InputStreamReader(CACHE().openInputStream(), StandardCharsets.UTF_8)) {
             JsonElement root = new JsonParser().parse(reader);
             if (!root.isJsonObject()) return;
             JsonObject obj = root.getAsJsonObject();
@@ -379,14 +382,14 @@ public final class UnityClanWeeklyXpPanel extends JPanel {
             saved.sort(Comparator.comparingLong((Entry e) -> e.xp).reversed()
                     .thenComparing(e -> e.name, String.CASE_INSENSITIVE_ORDER));
             entries = saved; cachedWeek = week;
-            nextFetchAt = Math.max(System.currentTimeMillis(), CACHE.lastModified() + REFRESH_MS);
+            nextFetchAt = Math.max(System.currentTimeMillis(), ClanCache.modified(CACHE()) + REFRESH_MS);
             status.setText("Saved weekly XP shown; waiting to refresh");
         } catch (Exception ignored) { /* Cache is best-effort. */ }
     }
 
     private void saveCache(String week, List<Entry> data) {
         try {
-            if (!CACHE.getParentFile().isDirectory() && !CACHE.getParentFile().mkdirs()) return;
+            CACHE().getParent().createDirectories();
             JsonObject root = new JsonObject(); root.addProperty("week", week);
             JsonArray array = new JsonArray();
             for (Entry e : data) {
@@ -394,7 +397,7 @@ public final class UnityClanWeeklyXpPanel extends JPanel {
                 player.addProperty("xp", e.xp); array.add(player);
             }
             root.add("players", array);
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(CACHE), StandardCharsets.UTF_8)) {
+            try (Writer writer = new OutputStreamWriter(CACHE().openOutputStream(), StandardCharsets.UTF_8)) {
                 writer.write(root.toString());
             }
         } catch (Exception ignored) { /* Cache is best-effort. */ }

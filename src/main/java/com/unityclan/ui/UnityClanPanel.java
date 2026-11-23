@@ -7,8 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Desktop;
-import java.net.URI;
+import net.runelite.client.util.LinkBrowser;
 import javax.swing.JOptionPane;
 import java.awt.Font;
 import java.util.List;
@@ -84,16 +83,7 @@ public class UnityClanPanel extends PluginPanel
         button.setFocusPainted(false);
         button.addActionListener(event -> {
             if ("discord".equals(page)) {
-                try {
-                    if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        throw new UnsupportedOperationException("Browser opening is unavailable");
-                    }
-                    Desktop.getDesktop().browse(new URI(DISCORD_INVITE));
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this,
-                            "Could not open Discord automatically. Visit: " + DISCORD_INVITE,
-                            "Unity Clan Discord", JOptionPane.INFORMATION_MESSAGE);
-                }
+                LinkBrowser.browse(DISCORD_INVITE);
                 return;
             }
             cardLayout.show(contentPanel, page);

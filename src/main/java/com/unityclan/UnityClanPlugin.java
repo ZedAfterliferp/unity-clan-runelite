@@ -70,6 +70,7 @@ public class UnityClanPlugin extends Plugin
 	protected void startUp()
 	{
 		ClanHttpConnection.initialize(okHttpClient);
+		ClanCache.initialize(getPluginDirectory());
 		running = true;
 		refreshTicks = 0;
 		lastRosterSignature = null;

@@ -1,14 +1,14 @@
 package com.unityclan.wom;
 
+import com.unityclan.ClanCache;
+import net.runelite.client.util.Filepath;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import com.unityclan.net.ClanHttpConnection;
@@ -35,15 +35,13 @@ public class UnityClanEventsService
     private static final int GROUP_ID = 10453;
 
     private static final long REFRESH_MS = TimeUnit.HOURS.toMillis(6);
-    private static final File CACHE_FILE = new File(
-            new File(System.getProperty("user.home"), ".runelite/unity-clan"),
-            "events-cache.json");
+    private static Filepath CACHE_FILE() { return ClanCache.file("events-cache.json"); }
 
     /** The cache stores raw WOM responses so event rankings survive restarts. */
     private JsonObject loadCache()
     {
-        if (!CACHE_FILE.isFile()) return new JsonObject();
-        try (FileReader reader = new FileReader(CACHE_FILE))
+        if (!CACHE_FILE().isFile()) return new JsonObject();
+        try (java.io.Reader reader = CACHE_FILE().openReader())
         {
             JsonElement value = new JsonParser().parse(reader);
             return value.isJsonObject() ? value.getAsJsonObject() : new JsonObject();
@@ -53,22 +51,18 @@ public class UnityClanEventsService
 
     private void saveCache(JsonObject cache)
     {
-        File directory = CACHE_FILE.getParentFile();
-        if (!directory.exists() && !directory.mkdirs()) return;
-        File temp = new File(directory, "events-cache.tmp");
-        try (FileWriter writer = new FileWriter(temp))
-        {
-            writer.write(cache.toString());
-        }
-        catch (IOException ex) { return; }
-        if (!temp.renameTo(CACHE_FILE))
-        {
-            try (FileWriter writer = new FileWriter(CACHE_FILE))
-            {
-                writer.write(cache.toString());
+        try {
+            Filepath target = CACHE_FILE();
+            target.getParent().createDirectories();
+            Filepath temp = target.getParent().createTempFile("events-cache-", ".tmp");
+            try {
+                temp.write(cache.toString());
+                temp.moveTo(target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } finally {
+                temp.deleteIfExists();
             }
-            catch (IOException ignored) { /* Keep existing cache if write fails. */ }
-            temp.delete();
+        } catch (IOException ex) {
+            log.debug("Unable to save events cache", ex);
         }
     }
 

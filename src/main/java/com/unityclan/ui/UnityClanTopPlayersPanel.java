@@ -1,5 +1,8 @@
 package com.unityclan.ui;
 
+import com.unityclan.ClanCache;
+import net.runelite.client.util.Filepath;
+
 import com.unityclan.wom.WiseOldManRequestGate;
 
 import com.google.gson.JsonArray;
@@ -11,9 +14,6 @@ import com.unityclan.members.ClanMemberInfo;
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.InputStreamReader;
 import com.unityclan.net.ClanHttpConnection;
@@ -42,8 +42,7 @@ public class UnityClanTopPlayersPanel extends JPanel
             GOLD, Color.decode("#C9CCD2"), Color.decode("#BD8561")
     };
 
-    private static final File CACHE_FILE = new File(
-            new File(System.getProperty("user.home"), ".runelite/unity-clan"), "top-players-cache.json");
+    private static Filepath CACHE_FILE() { return ClanCache.file("top-players-cache.json"); }
     private static final long CACHE_MAX_AGE_MS = TimeUnit.DAYS.toMillis(7);
     private static final long REFRESH_MS = TimeUnit.HOURS.toMillis(24);
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
@@ -128,7 +127,7 @@ public class UnityClanTopPlayersPanel extends JPanel
             return;
         }
         if (requested) return;
-        if (CACHE_FILE.isFile() && System.currentTimeMillis() - CACHE_FILE.lastModified() < REFRESH_MS) {
+        if (CACHE_FILE().isFile() && System.currentTimeMillis() - ClanCache.modified(CACHE_FILE()) < REFRESH_MS) {
             requested = true;
             status.setText("Saved all-time rankings (daily refresh)");
             return;
@@ -176,10 +175,10 @@ public class UnityClanTopPlayersPanel extends JPanel
 
     private void loadCache()
     {
-        if (!CACHE_FILE.isFile() || System.currentTimeMillis() - CACHE_FILE.lastModified() > CACHE_MAX_AGE_MS)
+        if (!CACHE_FILE().isFile() || System.currentTimeMillis() - ClanCache.modified(CACHE_FILE()) > CACHE_MAX_AGE_MS)
             return;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                new FileInputStream(CACHE_FILE), StandardCharsets.UTF_8)))
+                CACHE_FILE().openInputStream(), StandardCharsets.UTF_8)))
         {
             JsonElement parsed = new JsonParser().parse(reader);
             if (!parsed.isJsonArray()) return;
@@ -203,8 +202,8 @@ public class UnityClanTopPlayersPanel extends JPanel
     {
         try
         {
-            File folder = CACHE_FILE.getParentFile();
-            if (!folder.isDirectory() && !folder.mkdirs()) return;
+            Filepath folder = CACHE_FILE().getParent();
+            folder.createDirectories();
             JsonArray array = new JsonArray();
             for (PlayerScore p : loaded)
             {
@@ -216,7 +215,7 @@ public class UnityClanTopPlayersPanel extends JPanel
                 array.add(object);
             }
             try (OutputStreamWriter writer = new OutputStreamWriter(
-                    new FileOutputStream(CACHE_FILE), StandardCharsets.UTF_8))
+                    CACHE_FILE().openOutputStream(), StandardCharsets.UTF_8))
             {
                 writer.write(array.toString());
             }

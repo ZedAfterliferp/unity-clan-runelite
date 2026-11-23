@@ -1,14 +1,14 @@
 package com.unityclan.wom;
 
+import com.unityclan.ClanCache;
+import net.runelite.client.util.Filepath;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -31,8 +31,7 @@ public class WiseOldManService
 
     private static final int GROUP_ID = 10453;
 
-    private static final File COMPETITION_CACHE = new File(
-            new File(System.getProperty("user.home"), ".runelite/unity-clan"), "competition-cache.json");
+    private static Filepath COMPETITION_CACHE() { return ClanCache.file("competition-cache.json"); }
     private static final long COMPETITION_REFRESH_MS = TimeUnit.HOURS.toMillis(6);
     private long lastAttemptAt = 0L;
     private CompetitionData memoryCompetition;
@@ -45,8 +44,8 @@ public class WiseOldManService
             cacheLoaded = true;
         }
         long now = System.currentTimeMillis();
-        if (COMPETITION_CACHE.isFile()
-                && now - COMPETITION_CACHE.lastModified() < COMPETITION_REFRESH_MS)
+        if (COMPETITION_CACHE().isFile()
+                && now - ClanCache.modified(COMPETITION_CACHE()) < COMPETITION_REFRESH_MS)
             return memoryCompetition;
         if (now - lastAttemptAt < COMPETITION_REFRESH_MS && lastAttemptAt != 0L)
             return memoryCompetition;
@@ -63,8 +62,8 @@ public class WiseOldManService
     }
 
     private CompetitionData readCompetitionCache() {
-        if (!COMPETITION_CACHE.isFile()) return null;
-        try (Reader reader = new InputStreamReader(new FileInputStream(COMPETITION_CACHE), StandardCharsets.UTF_8)) {
+        if (!COMPETITION_CACHE().isFile()) return null;
+        try (Reader reader = new InputStreamReader(COMPETITION_CACHE().openInputStream(), StandardCharsets.UTF_8)) {
             JsonObject root = new JsonParser().parse(reader).getAsJsonObject();
             if (root.has("empty") && root.get("empty").getAsBoolean()) return null;
             List<PlayerStanding> standings = new ArrayList<>();
@@ -83,8 +82,8 @@ public class WiseOldManService
 
     private void writeCompetitionCache(CompetitionData competition) {
         try {
-            File parent = COMPETITION_CACHE.getParentFile();
-            if (!parent.isDirectory() && !parent.mkdirs()) return;
+            Filepath parent = COMPETITION_CACHE().getParent();
+            parent.createDirectories();
             JsonObject root = new JsonObject();
             if (competition == null) root.addProperty("empty", true);
             else {
@@ -103,7 +102,7 @@ public class WiseOldManService
                 }
                 root.add("standings", standings);
             }
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(COMPETITION_CACHE), StandardCharsets.UTF_8)) {
+            try (Writer writer = new OutputStreamWriter(COMPETITION_CACHE().openOutputStream(), StandardCharsets.UTF_8)) {
                 writer.write(root.toString());
             }
         } catch (Exception ignored) { /* Cache failure must not break the dashboard. */ }
