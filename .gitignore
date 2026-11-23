@@ -1,0 +1,31 @@
+.gradle
+build
+.idea/
+.project
+.settings/
+.classpath
+nbactions.xml
+nb-configuration.xml
+nbproject/
+*.class
+
+# Private server files (not included in release)
+server/.env
+server/*.db
+server/*.db-shm
+server/*.db-wal
+server/node_modules/
+
+# Additional private configuration
+.env
+.env.*
+!.env.example
+server/.env.*
+!server/.env.example
+
+# Logs and local files
+*.log
+out/
+*.iml
+.DS_Store
+Thumbs.db
