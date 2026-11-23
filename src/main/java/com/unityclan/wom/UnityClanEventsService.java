@@ -11,7 +11,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import com.unityclan.net.ClanHttpConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -163,7 +163,7 @@ public class UnityClanEventsService
             catch (Exception ex)
             {
                 complete = false;
-                System.err.println("Unity Clan: Unable to load competition " + id + ": " + ex.getMessage());
+                log.warn("Unity Clan: Unable to load competition {}", id, ex);
                 // A shared cooldown means continuing would just cause more failures.
                 if (ex.getMessage() != null &&
                         (ex.getMessage().contains("429") || ex.getMessage().contains("cooldown")))
@@ -279,7 +279,7 @@ public class UnityClanEventsService
     private JsonElement readJson(String address) throws Exception
     {
         return WiseOldManRequestGate.execute(() -> {
-            HttpURLConnection connection = (HttpURLConnection) new URL(address).openConnection();
+            ClanHttpConnection connection = ClanHttpConnection.open(address);
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("User-Agent", "UnityClanRuneLitePlugin/1.0");
