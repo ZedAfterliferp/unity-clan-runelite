@@ -2,6 +2,8 @@
 package com.unityclan;
 
 import com.unityclan.members.ClanMemberInfo;
+import com.unityclan.net.ClanHttpConnection;
+import okhttp3.OkHttpClient;
 import com.unityclan.ui.UnityClanPanel;
 
 import java.awt.image.BufferedImage;
@@ -51,6 +53,9 @@ public class UnityClanPlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private OkHttpClient okHttpClient;
+
+	@Inject
 	private ClientThread clientThread;
 
 	@Inject
@@ -64,6 +69,7 @@ public class UnityClanPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		ClanHttpConnection.initialize(okHttpClient);
 		running = true;
 		refreshTicks = 0;
 		lastRosterSignature = null;
