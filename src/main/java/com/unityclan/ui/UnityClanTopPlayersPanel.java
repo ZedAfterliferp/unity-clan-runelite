@@ -16,7 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import com.unityclan.net.ClanHttpConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -231,7 +231,7 @@ public class UnityClanTopPlayersPanel extends JPanel
 
     private List<PlayerScore> fetchBulkHiscoresDirect() throws Exception
     {
-        HttpURLConnection connection = (HttpURLConnection) new URL(BULK_URL).openConnection();
+        ClanHttpConnection connection = ClanHttpConnection.open(BULK_URL);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Accept", "application/json");
         connection.setRequestProperty("User-Agent", "UnityClanRuneLitePlugin/1.0");
