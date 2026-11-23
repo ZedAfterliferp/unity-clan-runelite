@@ -1,5 +1,7 @@
 package com.unityclan.ui;
 
+import com.unityclan.net.ClanHttpConnection;
+
 import com.unityclan.wom.UnityClanEventsService;
 import com.unityclan.wom.WiseOldManRequestGate;
 import com.google.gson.*;
