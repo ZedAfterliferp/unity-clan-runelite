@@ -8,7 +8,7 @@ import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import com.unityclan.net.ClanHttpConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -101,9 +101,8 @@ public class TempleOSRSService
                         + "&count="
                         + MAX_ITEMS;
 
-        HttpURLConnection connection =
-                (HttpURLConnection)
-                        new URL(urlString).openConnection();
+        ClanHttpConnection connection =
+                ClanHttpConnection.open(urlString);
 
         connection.setRequestMethod("GET");
 
