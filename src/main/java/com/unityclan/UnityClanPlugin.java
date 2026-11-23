@@ -67,7 +67,7 @@ public class UnityClanPlugin extends Plugin
 
 	private int refreshTicks = 0;
 	@Override
-	protected void startUp()
+	protected void startUp() throws IOException
 	{
 		ClanHttpConnection.initialize(okHttpClient);
 		ClanCache.initialize(getPluginDirectory());
