@@ -15,7 +15,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.concurrent.TimeUnit;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import com.unityclan.net.ClanHttpConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -322,9 +322,8 @@ public class WiseOldManService
 
     private JsonElement readJsonDirect(String address) throws Exception
     {
-        HttpURLConnection connection =
-                (HttpURLConnection) new URL(address)
-                        .openConnection();
+        ClanHttpConnection connection =
+                ClanHttpConnection.open(address);
 
         connection.setRequestMethod("GET");
         connection.setRequestProperty(
