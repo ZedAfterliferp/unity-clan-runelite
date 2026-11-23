@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class UnityClanEventsService
 {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UnityClanEventsService.class);
     private static final UnityClanEventsService SHARED = new UnityClanEventsService();
     public static UnityClanEventsService shared() { return SHARED; }
 
