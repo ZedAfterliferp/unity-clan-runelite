@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 
 @PluginDescriptor(
 		name = "Unity Clan",
+		internalName = "unity-clan",
+		legacyDataDirectory = "unity-clan",
 		description = "Clan management tools, events, and Discord integration",
 		tags = {"clan", "unity", "discord", "events"}
 )
